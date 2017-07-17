@@ -7,7 +7,7 @@ let Characteristic;
 // command queue
 let todoList  = [];
 let timer     = null;
-let timeout   = 50; // timeout between sending rc commands in ms
+let timeout   = 250; // timeout between sending rc commands in ms
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
@@ -51,19 +51,22 @@ class RC433EtekcitySwitch {
       .getCharacteristic(Characteristic.On)
       .on('set', (value, callback) => {
         state = value;
-        signal;
+        var signal;
         if(state) {
           signal = this.signalOn;
         } else {
           signal = this.signalOff;
         }
+        console.log('pushing signal onto todo list');
         todoList.push({
           'signal': signal,
           'callback': callback
         });
         if (timer == null) {
-          timer = setTimeout(toggleNext, timeout);
+          console.log('setting timeout');
+          timer = setTimeout(this.toggleNext, timeout, this);
         }
+				//callback();
       });
 
     service
@@ -72,23 +75,15 @@ class RC433EtekcitySwitch {
         callback(null, state);
       });
   }
-
-  toggleNext() {
+	
+  toggleNext(switchObject) {
     // get next todo item
-    todoItem = todoList.shift();
-    signal = todoItem['signal']();
-    callback = todoItem['callback']();
+    console.log('toggleNext()');
+    var todoItem = todoList.shift();
+    console.log('todoItem: '+todoItem['signal']+', todolist.length: '+todoList.length);
+    var signal = todoItem['signal'];
+    var callback = todoItem['callback'];
     // send signal
-    this.toggleSwitch(signal]);
-    // set timer for next todo
-    if (todoList.length > 0) {
-      timer = setTimeout(toggleNext, timeout);
-    }
-    // call callback
-    callback();
-  }
-
-  toggleSwitch(signal) {
     rfEmitter.sendCode(signal, function(error, stdout) {
       if(error) {
         console.log('error ' + error);
@@ -96,6 +91,15 @@ class RC433EtekcitySwitch {
         console.log('success ' + stdout);
       };
     });
+    // set timer for next todo
+    if (todoList.length > 0) {
+    	console.log('this: '+this+', this.helpme: '+this.helpme);
+      timer = setTimeout(switchObject.toggleNext, timeout, switchObject);
+    } else {
+    	timer = null;
+    }
+    // call callback
+    callback();
   }
-
+	
 }
