@@ -7,7 +7,7 @@ let Characteristic;
 // command queue
 let todoList  = [];
 let timer     = null;
-let timeout   = 250; // timeout between sending rc commands in ms
+let timeout   = 200; // timeout between sending rc commands in ms
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
