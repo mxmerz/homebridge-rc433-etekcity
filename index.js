@@ -4,6 +4,11 @@ const rfEmitter = rpi433.emitter({pin: 0, pulseLength: 179});
 let Service;
 let Characteristic;
 
+// command queue
+let todoList  = [];
+let timer     = null;
+let timeout   = 50; // timeout between sending rc commands in ms
+
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
@@ -46,12 +51,19 @@ class RC433EtekcitySwitch {
       .getCharacteristic(Characteristic.On)
       .on('set', (value, callback) => {
         state = value;
+        signal;
         if(state) {
-          this.toggleSwitch(this.signalOn);
+          signal = this.signalOn;
         } else {
-          this.toggleSwitch(this.signalOff);
+          signal = this.signalOff;
         }
-        callback();
+        todoList.push({
+          'signal': signal,
+          'callback': callback
+        });
+        if (timer == null) {
+          timer = setTimeout(toggleNext, timeout);
+        }
       });
 
     service
@@ -59,6 +71,21 @@ class RC433EtekcitySwitch {
       .on('get', (callback) => {
         callback(null, state);
       });
+  }
+
+  toggleNext() {
+    // get next todo item
+    todoItem = todoList.shift();
+    signal = todoItem['signal']();
+    callback = todoItem['callback']();
+    // send signal
+    this.toggleSwitch(signal]);
+    // set timer for next todo
+    if (todoList.length > 0) {
+      timer = setTimeout(toggleNext, timeout);
+    }
+    // call callback
+    callback();
   }
 
   toggleSwitch(signal) {
