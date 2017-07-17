@@ -72,7 +72,7 @@ class RC433EtekcitySwitch {
         callback(null, state);
       });
   }
-	
+
   toggleNext(switchObject) {
     // get next todo item
     var todoItem = todoList.shift();
@@ -90,7 +90,7 @@ class RC433EtekcitySwitch {
     if (todoList.length > 0) {
       timer = setTimeout(switchObject.toggleNext, timeout, switchObject);
     } else {
-    	timer = null;
+      timer = null;
     }
     // call callback
     callback();
