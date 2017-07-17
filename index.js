@@ -5,9 +5,9 @@ let Service;
 let Characteristic;
 
 // command queue
-let todoList  = [];
-let timer     = null;
-let timeout   = 200; // timeout between sending rc commands in ms
+let todoList = [];
+let timer    = null;
+let timeout  = 200; // timeout between sending rc commands in ms
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
@@ -57,16 +57,13 @@ class RC433EtekcitySwitch {
         } else {
           signal = this.signalOff;
         }
-        console.log('pushing signal onto todo list');
         todoList.push({
           'signal': signal,
           'callback': callback
         });
         if (timer == null) {
-          console.log('setting timeout');
           timer = setTimeout(this.toggleNext, timeout, this);
         }
-				//callback();
       });
 
     service
@@ -78,9 +75,7 @@ class RC433EtekcitySwitch {
 	
   toggleNext(switchObject) {
     // get next todo item
-    console.log('toggleNext()');
     var todoItem = todoList.shift();
-    console.log('todoItem: '+todoItem['signal']+', todolist.length: '+todoList.length);
     var signal = todoItem['signal'];
     var callback = todoItem['callback'];
     // send signal
@@ -93,7 +88,6 @@ class RC433EtekcitySwitch {
     });
     // set timer for next todo
     if (todoList.length > 0) {
-    	console.log('this: '+this+', this.helpme: '+this.helpme);
       timer = setTimeout(switchObject.toggleNext, timeout, switchObject);
     } else {
     	timer = null;
@@ -101,5 +95,4 @@ class RC433EtekcitySwitch {
     // call callback
     callback();
   }
-	
 }
