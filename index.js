@@ -1,5 +1,5 @@
 const rpi433    = require('rpi-433');
-const rfEmitter = rpi433.emitter({pin: 0, pulseLength: 179});
+const rfEmitter = rpi433.emitter({pin: 0, pulseLength: 420});
 
 let Service;
 let Characteristic;
@@ -7,15 +7,15 @@ let Characteristic;
 // command queue
 let todoList = [];
 let timer    = null;
-let timeout  = 200; // timeout between sending rc commands in ms
+let timeout  = 450; // timeout between sending rc commands (in ms)
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
-  homebridge.registerAccessory('homebridge-rc433-etekcity', 'RC433EtekcitySwitch', RC433EtekcitySwitch);
+  homebridge.registerAccessory('homebridge-rc433-etekcity', 'RC433Switch', RC433Switch);
 };
 
-class RC433EtekcitySwitch {
+class RC433Switch {
   constructor(log, config) {
 
     // config
@@ -33,9 +33,9 @@ class RC433EtekcitySwitch {
     // information service
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-      .setCharacteristic(Characteristic.Name, 'RC433EtekcitySwitch')
+      .setCharacteristic(Characteristic.Name, 'RC433Switch')
       .setCharacteristic(Characteristic.Manufacturer, 'CN')
-      .setCharacteristic(Characteristic.Model, 'Etekcity ' + this.name)
+      .setCharacteristic(Characteristic.Model, 'Switch ' + this.name)
       .setCharacteristic(Characteristic.SerialNumber, '1337-' + this.id);
 
   }
